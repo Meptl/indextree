@@ -7,6 +7,8 @@ pub struct NodeId(pub usize);
 
 impl NodeId {
     /// Return an iterator over references to the node's ancestors.
+    ///
+    /// This traverses up the tree by parent nodes.
     pub fn ancestors<T>(self, arena: &Arena<T>) -> Ancestors<T> {
         Ancestors {
             arena: arena,
@@ -15,8 +17,8 @@ impl NodeId {
     }
 
     /// Return an iterator over references to the node's previous siblings.
-    pub fn preceding_siblings<T>(self, arena: &Arena<T>) -> PrecedingSiblings<T> {
-        PrecedingSiblings {
+    pub fn previous_siblings<T>(self, arena: &Arena<T>) -> PreviousSiblings<T> {
+        PreviousSiblings {
             arena: arena,
             node: arena.get_node(self).previous_sibling,
         }
@@ -32,13 +34,21 @@ impl NodeId {
 
     /// Return an iterator over references to the node's children.
     pub fn children<T>(self, arena: &Arena<T>) -> Children<T> {
+
         Children {
             arena: arena,
             node: arena.get_node(self).first_child,
         }
     }
 
+    /// Return the parent NodeId of this node.
+    pub fn parent<T>(self, arena: &Arena<T>) -> Option<NodeId> {
+        arena.get_node(self).parent
+    }
+
     /// Detach a node from its parent.
+    ///
+    /// This does not deallocate the data.
     pub fn detach<T>(self, arena: &mut Arena<T>) {
         let (parent, previous_sibling, next_sibling) = {
             let node = &mut arena.get_node_mut(self);
@@ -71,6 +81,7 @@ impl NodeId {
             if let Some(last_child) = last_child_opt {
                 new_child_borrow.previous_sibling = Some(last_child);
             } else {
+                // This was the first node added to this node.
                 debug_assert!(self_borrow.first_child.is_none());
                 self_borrow.first_child = Some(new_child);
             }
@@ -94,7 +105,7 @@ impl NodeId {
             if let Some(first_child) = first_child_opt {
                 new_child_borrow.next_sibling = Some(first_child);
             } else {
-                debug_assert!(&self_borrow.first_child.is_none());
+                debug_assert!(self_borrow.last_child.is_none());
                 self_borrow.last_child = Some(new_child);
             }
         }
@@ -183,11 +194,11 @@ pub struct Ancestors<'a, T: 'a> {
 impl_node_iterator!(Ancestors, |node: &Node<T>| node.parent);
 
 /// An iterator to the siblings before a given node.
-pub struct PrecedingSiblings<'a, T: 'a> {
+pub struct PreviousSiblings<'a, T: 'a> {
     arena: &'a Arena<T>,
     node: Option<NodeId>,
 }
-impl_node_iterator!(PrecedingSiblings, |node: &Node<T>| node.previous_sibling);
+impl_node_iterator!(PreviousSiblings, |node: &Node<T>| node.previous_sibling);
 
 /// An iterator to the siblings after a given node.
 pub struct FollowingSiblings<'a, T: 'a> {

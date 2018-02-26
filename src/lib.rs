@@ -18,7 +18,11 @@
 //!
 //! // Append b to a
 //! a.append(b, arena);
-//! assert_eq!(b.ancestors(arena).into_iter().count(), 2);
+//! assert_eq!(a.children(arena).count(), 1);
+//! assert_eq!(b.parent(arena).unwrap(), a);
+//!
+//! // Retrieve data by indexing the arena
+//! assert_eq!(arena[a], 1);
 //! ```
 pub use arena::*;
 pub use nodeid::*;
