@@ -3,7 +3,6 @@ use super::NodeId;
 
 #[derive(Clone, Debug)]
 /// A node within a particular `Arena`
-/// This should not be returned by any public interface.
 pub struct Node<T> {
     pub parent: Option<NodeId>,
     pub previous_sibling: Option<NodeId>,

@@ -22,7 +22,7 @@
 //! ```
 pub use arena::*;
 pub use nodeid::*;
-pub use node::*;
+pub(crate) use node::*;
 
 mod arena;
 mod node;

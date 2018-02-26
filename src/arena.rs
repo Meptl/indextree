@@ -2,7 +2,7 @@ use ::std::ops::{Index, IndexMut};
 use super::{Node, NodeId};
 
 #[derive(Clone, Debug)]
-/// An `Arena` structure containing certain Nodes
+/// An `Arena` structure containing certain Nodes.
 pub struct Arena<T> {
     pub nodes: Vec<Node<T>>,
 }
@@ -27,19 +27,24 @@ impl<T> Arena<T> {
         NodeId(next_index)
     }
 
-    // Count nodes in arena.
-    pub fn count(&self) -> usize {
+    /// Returns the number of elements in the arena.
+    pub fn len(&self) -> usize {
         self.nodes.len()
     }
 
-    // Returns true if arena has no nodes, false otherwise
+    /// Returns `true` if arena has no elements.
     pub fn is_empty(&self) -> bool {
-        if self.count() == 0 {
-            true
-        }
-        else {
-            false
-        }
+        self.len() == 0
+    }
+
+    /// Returns a reference to the internal Node structure at NodeId.
+    pub(crate) fn get_node(&self, id: NodeId) -> &Node<T> {
+        &self.nodes[id.0]
+    }
+
+    /// Returns a mutable reference to the internal Node structure at NodeId.
+    pub(crate) fn get_node_mut(&mut self, id: NodeId) -> &mut Node<T> {
+        &mut self.nodes[id.0]
     }
 }
 
@@ -63,16 +68,16 @@ impl<T> GetPairMut<T> for Vec<T> {
 }
 
 impl<T> Index<NodeId> for Arena<T> {
-    type Output = Node<T>;
+    type Output = T;
 
-    fn index(&self, node: NodeId) -> &Node<T> {
-        &self.nodes[node.0]
+    fn index(&self, node: NodeId) -> &T {
+        &self.nodes[node.0].data
     }
 }
 
 impl<T> IndexMut<NodeId> for Arena<T> {
-    fn index_mut(&mut self, node: NodeId) -> &mut Node<T> {
-        &mut self.nodes[node.0]
+    fn index_mut(&mut self, node: NodeId) -> &mut T {
+        &mut self.nodes[node.0].data
     }
 }
 
